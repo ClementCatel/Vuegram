@@ -80,7 +80,6 @@
 </template>
 
 <script>
-import { log } from 'util';
 const fb = require('../firebaseConfig.js')
 
 export default {
@@ -126,12 +125,13 @@ export default {
     login() {
       this.performingRequest = true
 
-      firebase.auth().signInWithEmailAndPassword(this.loginForm.email, this.loginForm.password).then(user => {
-        this.$store.commit('setCurrentUser', user.user)
+      fb.auth.signInWithEmailAndPassword(this.loginForm.email, this.loginForm.password).then(credentials => {
+        let user = credentials.user
+        this.$store.commit('setCurrentUser', user)
         this.$store.dispatch('fetchUserProfile')
         this.performingRequest = false
         this.$router.push('/dashboard')
-      }).catch((error) => {
+      }).catch(err => {
         console.log(err)
         this.performingRequest = false
         this.errorMsg = err.message
@@ -141,11 +141,12 @@ export default {
     signup() {
       this.performingRequest = true
 
-      fb.auth.createUserWithEmailAndPassword(this.signupForm.email, this.signupForm.password).then(user => {
-        this.$store.commit('setCurrentUser', user.user)
+      fb.auth.createUserWithEmailAndPassword(this.signupForm.email, this.signupForm.password).then(credentials => {
+        let user = credentials.user
+        this.$store.commit('setCurrentUser', user)
 
         // create user obj
-        fb.usersCollection.doc(user.user.uid).set({
+        fb.usersCollection.doc(user.uid).set({
             name: this.signupForm.name,
             title: this.signupForm.title
         }).then(() => {
